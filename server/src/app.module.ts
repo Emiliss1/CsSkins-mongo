@@ -8,6 +8,7 @@ import { AdminModule } from './admin/admin.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MarketModule } from './market/market.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     SkinsModule,
     AdminModule,
     MarketModule,
+    TradeModule,
   ],
 })
 export class AppModule {}

@@ -10,7 +10,10 @@ import { User, UserSchema } from 'src/auth/user.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Skin.name, schema: skinSchema }]),
+    MongooseModule.forFeature([
+      { name: Skin.name, schema: skinSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
     AuthModule,
   ],
   controllers: [SkinsController],

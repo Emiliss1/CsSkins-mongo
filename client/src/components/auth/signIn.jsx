@@ -40,12 +40,12 @@ function SignUp() {
   return (
     <div>
       <Navbar />
-      <div className="w-5/6 md:w-[600px] mt-44 rounded-sm h-max pb-8 bg-zinc-900 mx-auto">
+      <div className="w-5/6 md:w-[600px] mt-16 md:mt-44 rounded-sm h-max pb-16 md:pb-8 bg-zinc-900 mx-auto">
         <h1 className="text-2xl rounded-tl-sm rounded-tr-sm text-white bg-zinc-950 pt-4 pb-4 text-center">
           Sign In
         </h1>
         {errMsg && (
-          <div className="w-108 py-4 rounded-sm flex border-red-400 border items-center bg-zinc-950 mx-auto mt-4">
+          <div className="w-5/6 md:w-108 py-4 rounded-sm flex border-red-400 border items-center bg-zinc-950 mx-auto mt-4">
             <p className="pl-4 text-red-400">{errMsg}</p>
           </div>
         )}

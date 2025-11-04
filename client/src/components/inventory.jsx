@@ -66,7 +66,10 @@ function Inventory() {
 
           setSkins(pagination(response.data, currentPage).pageItems);
 
-          managePages(currentPage, pagination(data, currentPage).totalPages);
+          managePages(
+            currentPage,
+            pagination(response.data, currentPage).totalPages
+          );
         }
         console.log("response", response);
       } catch (err) {

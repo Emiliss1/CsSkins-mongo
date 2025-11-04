@@ -169,19 +169,19 @@ export function AddSkin() {
                 </div>
                 <form
                   onSubmit={handleAddSkinMarket}
-                  className="flex flex-col w-[600px] gap-2 mx-auto items-center mt-4"
+                  className="flex flex-col w-5/6 md:w-[600px] gap-2 mx-auto items-center mt-4"
                 >
                   <label className="text-zinc-500 text-lg">
                     Set your skin price
                   </label>
                   <input
-                    className="bg-zinc-800 w-64 h-9 text-center rounded-md border-2 border-zinc-500"
+                    className="bg-zinc-800 w-11/12 sm:w-64 h-9 text-center rounded-md border-2 border-zinc-500"
                     placeholder="Price"
                     type="number"
                     onChange={(e) => setPrice(e.target.value)}
                   />
                   <button
-                    className="h-8 border-2 border-indigo-500 w-48 rounded-sm text-indigo-500 text-lg cursor-pointer hover:border-indigo-600 hover:text-indigo-600"
+                    className="h-8 border-2 border-indigo-500 w-5/6 sm:w-48 rounded-sm text-indigo-500 text-lg cursor-pointer hover:border-indigo-600 hover:text-indigo-600"
                     type="submit"
                   >
                     Add

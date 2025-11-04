@@ -101,7 +101,15 @@ export function Navbar({ balanceData, profileImageProp, updatedUsername }) {
           >
             Market
           </p>
-          <p className="cursor-pointer hover:text-gray-200">Trade</p>
+          <p
+            data-route="/trade"
+            className="cursor-pointer hover:text-gray-200"
+            onClick={(e) => {
+              handleNavbarNavigation(e.target.getAttribute("data-route"));
+            }}
+          >
+            Trade
+          </p>
         </div>
         {isLoggedIn ? (
           <div className="flex w-max items-center ml-auto mr-8">

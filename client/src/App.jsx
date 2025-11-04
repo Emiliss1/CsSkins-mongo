@@ -9,6 +9,8 @@ import AdminPanel from "./components/adminPanel";
 import { BanErr } from "./components/auth/banErr";
 import Profile from "./components/profile";
 import Market from "./components/market/market";
+import Trade from "./components/trade/trade";
+import TradeCreateOffer from "./components/trade/trade-create-offer";
 
 function App() {
   return (
@@ -24,6 +26,11 @@ function App() {
           <Route path="banned" element={<BanErr />}></Route>
           <Route path="profile" element={<Profile />}></Route>
           <Route path="market" element={<Market />}></Route>
+          <Route path="trade" element={<Trade />}></Route>
+          <Route
+            path="trade-offer/:username"
+            element={<TradeCreateOffer />}
+          ></Route>
         </Routes>
       </BrowserRouter>
     </>

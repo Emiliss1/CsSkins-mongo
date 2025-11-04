@@ -1,7 +1,7 @@
 import React from "react";
 
-export function pagination(data, curPage = 0) {
-  const itemsPerPage = window.innerWidth > 640 ? 16 : 8;
+export function pagination(data, curPage = 0, itemsNumber = 16) {
+  const itemsPerPage = window.innerWidth > 640 ? itemsNumber : itemsNumber / 2;
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const pageItems = [];
