@@ -4,6 +4,7 @@ import { Trade, TradeDocument } from './trade.schema';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/auth/user.schema';
 import { TradeSearchUserDto } from './dto/trade-search-user.dto';
+import { TradeGetUserDto } from './dto/trade-get-user.dto';
 
 @Injectable()
 export class TradeRepository {
@@ -29,5 +30,20 @@ export class TradeRepository {
     );
 
     return filteredUsers;
+  }
+
+  async getUserInventory(tradeGetUserDto: TradeGetUserDto): Promise<User> {
+    const { username } = tradeGetUserDto;
+
+    const foundUser = await this.userModel
+      .findOne({ username })
+      .lean()
+      .populate('skins');
+
+    if (!foundUser) {
+      throw new NotFoundException('User was not found');
+    }
+
+    return foundUser;
   }
 }

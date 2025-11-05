@@ -4,14 +4,28 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { pagination } from "../functions/pagination";
+import { useLocation } from "react-router-dom";
+import defaultProfilePicture from "../../assets/default.jpg";
 
 function TradeCreateOffer() {
   const [senderSkins, setSenderSkins] = useState([]);
+  const [senderSkinsData, setSenderSkinsData] = useState([]);
+  const [receiverSkins, setReceiverSkins] = useState([]);
+  const [receiverSkinsData, setReceiverSkinsData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [lastPage, setLastPage] = useState();
   const [btnForward, setBtnForward] = useState("flex");
   const [btnBack, setBtnBack] = useState("flex");
   const [totalPages, setTotalPages] = useState();
+  const [isSenderInventory, setIsSenderInventory] = useState(true);
+  const [sender, setSender] = useState();
+  const [receiver, setReceiver] = useState();
+  const [senderTradeSkins, setSenderTradeSkins] = useState([]);
+  const [receiverTradeSkins, setReceiverTradeSkins] = useState([]);
+
+  const { pathname } = useLocation();
+
+  const urlUsername = pathname.replace("/trade-offer/", "");
 
   const token = Cookies.get("token");
   const tokenHeader = {
@@ -21,27 +35,113 @@ function TradeCreateOffer() {
   };
 
   useEffect(() => {
-    const getSenderInventory = async () => {
+    const getSender = async () => {
       try {
         const response = await axios.get(
           "http://localhost:3000/skins",
           tokenHeader
         );
+
+        const userResponse = await axios.get(
+          "http://localhost:3000/user/profile",
+          tokenHeader
+        );
+
+        if (userResponse) {
+          setSender(userResponse.data);
+        }
+
         if (response) {
+          setSenderSkinsData(response.data);
           setSenderSkins(pagination(response.data, currentPage, 12).pageItems);
-          managePages(
-            currentPage,
-            pagination(response.data, currentPage, 12).totalPages
-          );
-          setTotalPages(pagination(response.data, currentPage, 12).totalPages);
+
+          if (isSenderInventory) {
+            managePages(
+              currentPage,
+              pagination(response.data, currentPage, 12).totalPages
+            );
+            setTotalPages(
+              pagination(response.data, currentPage, 12).totalPages
+            );
+          }
+
           console.log(response);
         }
       } catch (err) {
         console.log(err);
       }
     };
+
+    const getReceiver = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/trade/getuser?username=${urlUsername}`,
+          tokenHeader
+        );
+        if (response) {
+          setReceiver(response.data);
+          setReceiverSkinsData(response.data.skins);
+          setReceiverSkins(
+            pagination(response.data.skins, currentPage, 12).pageItems
+          );
+
+          if (!isSenderInventory) {
+            managePages(
+              currentPage,
+              pagination(response.data.skins, currentPage, 12).totalPages
+            );
+            setTotalPages(
+              pagination(response.data.skins, currentPage, 12).totalPages
+            );
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    getReceiver();
+    getSender();
+  }, []);
+
+  useEffect(() => {
+    const getSenderInventory = () => {
+      if (senderSkins.length > 0) {
+        if (isSenderInventory) {
+          setSenderSkins(
+            pagination(senderSkinsData, currentPage, 12).pageItems
+          );
+          managePages(
+            currentPage,
+            pagination(senderSkinsData, currentPage, 12).totalPages
+          );
+          setTotalPages(
+            pagination(senderSkinsData, currentPage, 12).totalPages
+          );
+        }
+      }
+    };
+
+    const getReceiverInventory = () => {
+      if (receiverSkins.length > 0) {
+        if (!isSenderInventory) {
+          setReceiverSkins(
+            pagination(receiverSkinsData, currentPage, 12).pageItems
+          );
+          managePages(
+            currentPage,
+            pagination(receiverSkinsData, currentPage, 12).totalPages
+          );
+          setTotalPages(
+            pagination(receiverSkinsData, currentPage, 12).totalPages
+          );
+        }
+      }
+    };
+
+    getReceiverInventory();
     getSenderInventory();
-  }, [currentPage]);
+  }, [currentPage, isSenderInventory, senderTradeSkins, receiverTradeSkins]);
 
   const managePages = (curPage = 0, totalPages) => {
     if (curPage + 1 >= totalPages) setBtnForward("hidden");
@@ -52,28 +152,75 @@ function TradeCreateOffer() {
 
     setLastPage(totalPages);
   };
+
+  const handleAddSkin = (index) => {
+    const skinIndex = index + currentPage * 12;
+    if (isSenderInventory) {
+      setSenderTradeSkins((prev) => [...prev, senderSkinsData[skinIndex]]);
+      setSenderSkinsData((prev) => prev.filter((_, i) => i !== skinIndex));
+      if (senderSkins.length - 1 <= 0) {
+        setCurrentPage((prev) => prev - 1);
+      }
+    } else {
+      setReceiverTradeSkins((prev) => [...prev, receiverSkinsData[skinIndex]]);
+      setReceiverSkinsData((prev) => prev.filter((_, i) => i !== skinIndex));
+      console.log("ladidaa", receiverSkins);
+      if (receiverSkins.length - 1 <= 0) {
+        setCurrentPage((prev) => prev - 1);
+      }
+    }
+  };
   return (
     <div>
       <Navbar />
       <div className="w-[1100px] h-max flex justify-around rounded-sm bg-zinc-900 py-8 mx-auto mt-8">
         <div className="w-[450px] h-116 bg-zinc-800/50">
           <div className="w-full h-max flex text-white text-lg bg-zinc-950">
-            <button className="w-full h-16 cursor-pointer text-indigo-500  border-b-5 border-indigo-500">
+            <button
+              onClick={() => {
+                setIsSenderInventory(true);
+                !isSenderInventory && setCurrentPage(0);
+              }}
+              className={`w-full h-16 cursor-pointer ${
+                isSenderInventory &&
+                "border-b-5 border-indigo-500  text-indigo-500"
+              } `}
+            >
               Your inventory
             </button>
-            <button className="w-full h-16 cursor-pointer ">
+            <button
+              onClick={() => {
+                setIsSenderInventory(false);
+                isSenderInventory && setCurrentPage(0);
+              }}
+              className={`w-full h-16 cursor-pointer ${
+                !isSenderInventory &&
+                "border-b-5 border-indigo-500  text-indigo-500"
+              }`}
+            >
               Their inventory
             </button>
           </div>
           <div className="w-11/12 h-78 gap-y-4 mx-auto py-2 grid grid-rows-3 grid-cols-4 mt-4  bg-zinc-900">
-            {senderSkins.map((skin, index) => (
-              <div
-                className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
-                key={index}
-              >
-                <img className="w-20" src={skin.image} alt="" />
-              </div>
-            ))}
+            {isSenderInventory
+              ? senderSkins?.map((skin, index) => (
+                  <div
+                    onClick={() => handleAddSkin(index)}
+                    className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                    key={index}
+                  >
+                    <img className="w-20" src={skin?.image} alt="" />
+                  </div>
+                ))
+              : receiverSkins?.map((skin, index) => (
+                  <div
+                    onClick={() => handleAddSkin(index)}
+                    className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                    key={index}
+                  >
+                    <img className="w-20" src={skin?.image} alt="" />
+                  </div>
+                ))}
           </div>
           <div className="flex mt-4 justify-center gap-2 mx-auto">
             <button
@@ -100,7 +247,54 @@ function TradeCreateOffer() {
             </button>
           </div>
         </div>
-        <div className="w-[550px] h-68 bg-zinc-800/50"></div>
+        <div className="w-[550px] h-max pb-4 bg-zinc-800/50">
+          <div className="w-full ">
+            <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
+              <img
+                className="w-12 h-12"
+                src={
+                  sender?.image
+                    ? `http://localhost:3000/uploads\\${sender.image}`
+                    : defaultProfilePicture
+                }
+              />
+              <p className="pl-4">Your items</p>
+            </div>
+            <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll bg-zinc-900 mt-4">
+              {senderTradeSkins?.map((skin, index) => (
+                <div
+                  className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                  key={index}
+                >
+                  <img className="w-20" src={skin?.image} alt="" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="w-full mt-4">
+            <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
+              <img
+                className="w-12 h-12"
+                src={
+                  receiver?.image
+                    ? `http://localhost:3000/uploads\\${receiver.image}`
+                    : defaultProfilePicture
+                }
+              />
+              <p className="pl-4">{receiver?.username} items</p>
+            </div>
+            <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll h-48 bg-zinc-900 mt-4">
+              {receiverTradeSkins?.map((skin, index) => (
+                <div
+                  className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                  key={index}
+                >
+                  <img className="w-20" src={skin?.image} alt="" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

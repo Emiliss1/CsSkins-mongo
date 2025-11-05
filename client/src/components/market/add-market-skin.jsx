@@ -64,7 +64,7 @@ export function AddSkin() {
         if (response) {
           console.log(response);
           setSkins(pagination(response.data, currentPage).pageItems);
-          setSkinsData(pagination(response.data, currentPage).pageItems);
+          setSkinsData(response.data);
           managePages(
             currentPage,
             pagination(response.data, currentPage).totalPages

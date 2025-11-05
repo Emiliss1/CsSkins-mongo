@@ -163,7 +163,7 @@ function openCase() {
           const randomGoldSkinIndex = Math.trunc(
             Math.random() * crate.contains_rare.length
           );
-          setUnlockedSkin();
+          setUnlockedSkin(crate.contains_rare[randomGoldSkinIndex]);
           skinData = crate.contains_rare[randomGoldSkinIndex];
         } else {
           setUnlockedSkin(randomSkins[49]);

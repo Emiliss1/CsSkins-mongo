@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TradeRepository } from './trade.repository';
 import { TradeSearchUserDto } from './dto/trade-search-user.dto';
 import { User } from 'src/auth/user.schema';
+import { TradeGetUserDto } from './dto/trade-get-user.dto';
 
 @Injectable()
 export class TradeService {
@@ -12,5 +13,9 @@ export class TradeService {
     user: User,
   ): Promise<User[]> {
     return this.tradeRepository.searchUser(tradeSearchUserDto, user);
+  }
+
+  async getUserInventory(tradeGetUserDto: TradeGetUserDto): Promise<User> {
+    return this.tradeRepository.getUserInventory(tradeGetUserDto);
   }
 }

@@ -62,7 +62,7 @@ export function UserMarketSkins() {
         );
 
         if (response) {
-          setSkinsData(pagination(response.data, currentPage).pageItems);
+          setSkinsData(response.data);
           setSkins(pagination(response.data, currentPage).pageItems);
 
           managePages(

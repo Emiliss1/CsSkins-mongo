@@ -89,7 +89,7 @@ function Market() {
         console.log("market skins", response);
         if (response) {
           setMarketSkins(pagination(response.data, currentPage).pageItems);
-          setMarketSkinsData(pagination(response.data, currentPage).pageItems);
+          setMarketSkinsData(response.data);
           managePages(
             currentPage,
             pagination(response.data, currentPage).totalPages

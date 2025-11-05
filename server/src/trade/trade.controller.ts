@@ -7,6 +7,7 @@ import { Role } from 'src/auth/roles.enum';
 import { TradeSearchUserDto } from './dto/trade-search-user.dto';
 import { User } from 'src/auth/user.schema';
 import { GetUser } from 'src/auth/get-user.decorator';
+import { TradeGetUserDto } from './dto/trade-get-user.dto';
 
 @Controller('trade')
 @UseGuards(AuthGuard(), RolesGuard)
@@ -20,5 +21,10 @@ export class TradeController {
     @GetUser() user: User,
   ): Promise<User[]> {
     return this.tradeService.searchUser(tradeSearchUserDto, user);
+  }
+
+  @Get('/getuser')
+  getUserInventory(@Query() tradeGetUserDto: TradeGetUserDto): Promise<User> {
+    return this.tradeService.getUserInventory(tradeGetUserDto);
   }
 }

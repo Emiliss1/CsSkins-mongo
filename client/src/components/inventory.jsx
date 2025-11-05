@@ -62,7 +62,7 @@ function Inventory() {
 
         if (response.status === 200) {
           // setSkins(response.data);
-          setSkinsData(pagination(response.data, currentPage).pageItems);
+          setSkinsData(response.data);
 
           setSkins(pagination(response.data, currentPage).pageItems);
 
