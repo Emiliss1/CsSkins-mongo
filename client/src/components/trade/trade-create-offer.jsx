@@ -22,6 +22,7 @@ function TradeCreateOffer() {
   const [receiver, setReceiver] = useState();
   const [senderTradeSkins, setSenderTradeSkins] = useState([]);
   const [receiverTradeSkins, setReceiverTradeSkins] = useState([]);
+  const [tradeErr, setTradeErr] = useState("");
 
   const { pathname } = useLocation();
 
@@ -170,6 +171,35 @@ function TradeCreateOffer() {
       }
     }
   };
+
+  const handleRemoveSkin = (index, user) => {
+    if (user === "sender") {
+      setSenderSkinsData((prev) => [senderTradeSkins[index], ...prev]);
+      setSenderTradeSkins((prev) => prev.filter((_, i) => i !== index));
+    } else if (user === "receiver") {
+      setReceiverSkinsData((prev) => [receiverTradeSkins[index], ...prev]);
+      setReceiverTradeSkins((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleCreateTrade = async () => {
+    try {
+      const data = {
+        senderSkins: senderTradeSkins,
+        receiverSkins: receiverTradeSkins,
+        receiver: receiver._id,
+      };
+
+      const response = await axios.post(
+        "http://localhost:3000/trade/createtrade",
+        data,
+        tokenHeader
+      );
+    } catch (err) {
+      console.log(err);
+      setTradeErr(err.response.data.message);
+    }
+  };
   return (
     <div>
       <Navbar />
@@ -263,6 +293,7 @@ function TradeCreateOffer() {
             <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll bg-zinc-900 mt-4">
               {senderTradeSkins?.map((skin, index) => (
                 <div
+                  onClick={() => handleRemoveSkin(index, "sender")}
                   className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
                   key={index}
                 >
@@ -286,12 +317,29 @@ function TradeCreateOffer() {
             <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll h-48 bg-zinc-900 mt-4">
               {receiverTradeSkins?.map((skin, index) => (
                 <div
+                  onClick={() => handleRemoveSkin(index, "receiver")}
                   className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
                   key={index}
                 >
                   <img className="w-20" src={skin?.image} alt="" />
                 </div>
               ))}
+            </div>
+            {tradeErr && (
+              <div
+                className={`py-1 w-68 pr-4  mx-auto border-2 border-red-400 mt-4 rounded-sm mb-4 flex items-center bg-zinc-950`}
+              >
+                <p className={`pl-4 text-red-400`}>! {tradeErr}</p>
+              </div>
+            )}
+
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleCreateTrade}
+                className="w-40 h-10 bg-indigo-500 text-white text-lg rounded-lg cursor-pointer hover:bg-indigo-600"
+              >
+                Make offer
+              </button>
             </div>
           </div>
         </div>

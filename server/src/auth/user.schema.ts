@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import { Role } from './roles.enum';
 import { Skin } from 'src/skins/skin-schema';
 import { ExcludeProperty } from 'nestjs-mongoose-exclude';
+import { Trade } from 'src/trade/trade.schema';
 
 export type UserDocument = HydratedDocument<User>;
 

@@ -3,6 +3,7 @@ import { TradeRepository } from './trade.repository';
 import { TradeSearchUserDto } from './dto/trade-search-user.dto';
 import { User } from 'src/auth/user.schema';
 import { TradeGetUserDto } from './dto/trade-get-user.dto';
+import { TradeCreateDto } from './dto/trade-create.dto';
 
 @Injectable()
 export class TradeService {
@@ -17,5 +18,9 @@ export class TradeService {
 
   async getUserInventory(tradeGetUserDto: TradeGetUserDto): Promise<User> {
     return this.tradeRepository.getUserInventory(tradeGetUserDto);
+  }
+
+  async createTrade(tradeCreateDto: TradeCreateDto, user: User): Promise<void> {
+    return this.tradeRepository.createTrade(tradeCreateDto, user);
   }
 }
