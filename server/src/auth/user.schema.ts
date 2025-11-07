@@ -36,9 +36,6 @@ export class User {
 
   @Prop({ default: '' })
   image: string;
-
-  @Prop({ type: [{ type: String, ref: 'Skin' }] })
-  skins: Skin[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

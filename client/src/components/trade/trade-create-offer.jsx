@@ -79,20 +79,21 @@ function TradeCreateOffer() {
           `http://localhost:3000/trade/getuser?username=${urlUsername}`,
           tokenHeader
         );
+        console.log("receiver data", response);
         if (response) {
-          setReceiver(response.data);
-          setReceiverSkinsData(response.data.skins);
+          setReceiver(response.data.foundUser);
+          setReceiverSkinsData(response.data.foundSkins);
           setReceiverSkins(
-            pagination(response.data.skins, currentPage, 12).pageItems
+            pagination(response.data.foundSkins, currentPage, 12).pageItems
           );
 
           if (!isSenderInventory) {
             managePages(
               currentPage,
-              pagination(response.data.skins, currentPage, 12).totalPages
+              pagination(response.data.foundSkins, currentPage, 12).totalPages
             );
             setTotalPages(
-              pagination(response.data.skins, currentPage, 12).totalPages
+              pagination(response.data.foundSkins, currentPage, 12).totalPages
             );
           }
         }

@@ -24,16 +24,6 @@ export class SkinsRepository {
     });
 
     await skin.save();
-
-    const foundUser = await this.userModel.findOne({ _id: user._id });
-
-    if (!foundUser) {
-      throw new NotFoundException('user was not found');
-    }
-
-    foundUser.skins.push(skin);
-
-    await foundUser.save();
   }
 
   async getSkins(user: User): Promise<Skin[]> {

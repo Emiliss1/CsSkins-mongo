@@ -9,6 +9,8 @@ import { User } from 'src/auth/user.schema';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { TradeGetUserDto } from './dto/trade-get-user.dto';
 import { TradeCreateDto } from './dto/trade-create.dto';
+import { Trade } from './trade.schema';
+import { TradeTransferSkinsDto } from './dto/trade-transfer-skins.dto';
 
 @Controller('trade')
 @UseGuards(AuthGuard(), RolesGuard)
@@ -25,7 +27,7 @@ export class TradeController {
   }
 
   @Get('/getuser')
-  getUserInventory(@Query() tradeGetUserDto: TradeGetUserDto): Promise<User> {
+  getUserInventory(@Query() tradeGetUserDto: TradeGetUserDto): Promise<Object> {
     return this.tradeService.getUserInventory(tradeGetUserDto);
   }
 
@@ -35,5 +37,18 @@ export class TradeController {
     @GetUser() user: User,
   ): Promise<void> {
     return this.tradeService.createTrade(tradeCreateDto, user);
+  }
+
+  @Get('/gettrades')
+  getTradeOffers(@GetUser() user: User): Promise<Trade[]> {
+    return this.tradeService.getTradeOffers(user);
+  }
+
+  @Post('/transferskins')
+  transferTradeSkins(
+    @GetUser() user: User,
+    @Body() tradeTransferSkinsDto: TradeTransferSkinsDto,
+  ): Promise<void> {
+    return this.tradeService.transferTradeSkins(user, tradeTransferSkinsDto);
   }
 }
