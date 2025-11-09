@@ -36,4 +36,14 @@ export class TradeService {
   ): Promise<void> {
     return this.tradeRepository.transferTradeSkins(user, tradeTransferSkinsDto);
   }
+
+  async declineTrade(
+    tradeTransferSkinsDto: TradeTransferSkinsDto,
+  ): Promise<void> {
+    return this.tradeRepository.declineTrade(tradeTransferSkinsDto);
+  }
+
+  async getSentOffers(user: User): Promise<Trade[]> {
+    return this.tradeRepository.getSentOffers(user);
+  }
 }

@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import axios from "axios";
-import defaultProfilePicture from "../../assets/default.jpg";
 import { AuthErr } from "../auth/authErr";
 import { PermErr } from "../auth/permErr";
+import defaultProfilePicture from "../../assets/default.jpg";
+import axios from "axios";
 
-export function TradeOffers() {
-  const [trades, setTrades] = useState([]);
-  const [tradeMsg, setTradeMsg] = useState("");
-  const [tradeErr, setTradeErr] = useState("");
+export function TradeSentOffers() {
   const [authErr, setAuthErr] = useState();
+  const [trades, setTrades] = useState([]);
+  const [tradeErr, setTradeErr] = useState("");
 
   const token = Cookies.get("token");
   const tokenHeader = {
@@ -19,20 +18,18 @@ export function TradeOffers() {
   };
 
   useEffect(() => {
-    const fetchTrades = async () => {
+    const fetchSentOffers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/trade/gettrades",
+          "http://localhost:3000/trade/getsentoffers",
           tokenHeader
         );
-
+        console.log("gagfa", response);
         if (response) {
-          console.log(response);
           setTrades(response.data);
         }
       } catch (err) {
         console.log(err);
-
         if (err.status === 401) {
           setAuthErr(<AuthErr />);
         }
@@ -41,28 +38,8 @@ export function TradeOffers() {
         }
       }
     };
-    fetchTrades();
+    fetchSentOffers();
   }, []);
-
-  const handleAcceptTrade = async (trade, index) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/trade/transferSkins",
-        { _id: trade._id },
-        tokenHeader
-      );
-      if (response) {
-        console.log("trade success");
-        setTrades((trade) => trade.filter((_, i) => i !== index));
-        setTradeMsg(
-          `You have accepted ${trades[index].sender.username} trade offer`
-        );
-      }
-    } catch (err) {
-      console.log(err);
-      setTradeErr("This trade offer no longer exists!");
-    }
-  };
 
   const handleDeclineTrade = async (trade, index) => {
     try {
@@ -73,9 +50,6 @@ export function TradeOffers() {
       );
       if (response) {
         setTrades((trade) => trade.filter((_, i) => i !== index));
-        setTradeMsg(
-          `You have declined ${trades[index].sender.username} trade offer`
-        );
       }
     } catch (err) {
       setTradeErr("This trade offer no longer exists!");
@@ -86,15 +60,7 @@ export function TradeOffers() {
     <div>
       {authErr || (
         <div className="w-[700px] flex flex-col items-center pb-8 h-120 overflow-y-scroll bg-zinc-800/50">
-          {tradeMsg ? (
-            <div className="flex flex-col items-center">
-              <div
-                className={`py-1 w-5/6 sm:w-68 pr-4 mx-auto border-2  border-green-400 mt-4 rounded-sm mb-4 flex  items-center bg-zinc-950`}
-              >
-                <p className={`pl-4 text-green-400`}>! {tradeMsg}</p>
-              </div>
-            </div>
-          ) : tradeErr ? (
+          {tradeErr && (
             <div className="flex flex-col items-center">
               <div
                 className={`py-1 w-68 pr-4 mx-auto border-2  border-red-400 mt-4 rounded-sm mb-4 flex  items-center bg-zinc-950`}
@@ -102,8 +68,6 @@ export function TradeOffers() {
                 <p className={`pl-4 text-red-400`}>! {tradeErr}</p>
               </div>
             </div>
-          ) : (
-            ""
           )}
           {trades.length > 0 ? (
             trades.map((trade, index) => (
@@ -118,9 +82,24 @@ export function TradeOffers() {
                     }
                     alt=""
                   />
-                  <p>{trade.sender.username} sent you a trade offer</p>
+
+                  <p className="flex gap-2 items-center">
+                    You sent offer to{" "}
+                    <span>
+                      <img
+                        className="w-8 h-8"
+                        src={
+                          trade.user.image
+                            ? `http://localhost:3000/uploads\\${trade.user.image}`
+                            : defaultProfilePicture
+                        }
+                        alt=""
+                      />
+                    </span>{" "}
+                    {trade.user.username}
+                  </p>
                 </div>
-                <p className="pl-8 mt-2">{trade.sender.username} Offer</p>
+                <p className="pl-8 mt-2">Your Offer</p>
                 <div className="w-11/12 min-h-[100px] max-h-[210px] bg-zinc-800  gap-y-4 mx-auto py-2 grid grid-cols-5 overflow-y-scroll mt-2">
                   {trade.senderSkins &&
                     trade.senderSkins.map((skin, index) => (
@@ -132,7 +111,20 @@ export function TradeOffers() {
                       </div>
                     ))}
                 </div>
-                <p className="pl-8 mt-2">For your's </p>
+                <div className="flex gap-2 py-2 items-center">
+                  <p className="pl-8 mt-2">For </p>
+                  <img
+                    className="w-8 h-8"
+                    src={
+                      trade.user.image
+                        ? `http://localhost:3000/uploads\\${trade.user.image}`
+                        : defaultProfilePicture
+                    }
+                    alt=""
+                  />
+                  <p>{trade.user.username}</p>
+                </div>
+
                 <div className="w-11/12 min-h-[100px] max-h-[210px] bg-zinc-800  gap-y-4 mx-auto py-2 grid grid-cols-5 overflow-y-scroll mt-2">
                   {trade.receiverSkins &&
                     trade.receiverSkins.map((skin, index) => (
@@ -146,16 +138,10 @@ export function TradeOffers() {
                 </div>
                 <div className="flex mt-4 gap-2 justify-end pr-4 items-center">
                   <button
-                    onClick={() => handleAcceptTrade(trade, index)}
-                    className="w-32 h-9 border-2 border-indigo-500 text-indigo-500 cursor-pointer text-lg rounded-sm hover:border-indigo-500/90 hover:text-indigo-500/90"
-                  >
-                    Accept Trade
-                  </button>
-                  <button
                     onClick={() => handleDeclineTrade(trade, index)}
                     className="w-32 h-9 border-2 border-red-400 text-red-400 cursor-pointer text-lg rounded-sm hover:border-red-400/90 hover:text-red-400/90"
                   >
-                    Decline Trade
+                    Cancel Trade
                   </button>
                 </div>
               </div>
@@ -163,7 +149,7 @@ export function TradeOffers() {
           ) : (
             <div className="flex items-center h-full">
               <p className="text-xl  text-zinc-300">
-                You have no trade offers at this time
+                You didn't sent any offers
               </p>
             </div>
           )}

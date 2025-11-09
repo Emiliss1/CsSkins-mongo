@@ -4,8 +4,10 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { pagination } from "../functions/pagination";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import defaultProfilePicture from "../../assets/default.jpg";
+import { AuthErr } from "../auth/authErr";
+import { PermErr } from "../auth/permErr";
 
 function TradeCreateOffer() {
   const [senderSkins, setSenderSkins] = useState([]);
@@ -23,6 +25,8 @@ function TradeCreateOffer() {
   const [senderTradeSkins, setSenderTradeSkins] = useState([]);
   const [receiverTradeSkins, setReceiverTradeSkins] = useState([]);
   const [tradeErr, setTradeErr] = useState("");
+  const [isTradeCreated, setIsTradeCreated] = useState(false);
+  const [authErr, setAuthErr] = useState();
 
   const { pathname } = useLocation();
 
@@ -34,6 +38,8 @@ function TradeCreateOffer() {
       Authorization: `Bearer ${token}`,
     },
   };
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getSender = async () => {
@@ -70,6 +76,12 @@ function TradeCreateOffer() {
         }
       } catch (err) {
         console.log(err);
+        if (err.status === 401) {
+          setAuthErr(<AuthErr />);
+        }
+        if (err.status === 403) {
+          setAuthErr(<PermErr />);
+        }
       }
     };
 
@@ -196,155 +208,183 @@ function TradeCreateOffer() {
         data,
         tokenHeader
       );
+
+      if (response) {
+        setIsTradeCreated(true);
+        setTimeout(() => {
+          return navigate("/trade");
+        }, 5000);
+      }
     } catch (err) {
       console.log(err);
       setTradeErr(err.response.data.message);
+      if (err.status === 401) {
+        setAuthErr(<AuthErr />);
+      }
+      if (err.status === 403) {
+        setAuthErr(<PermErr />);
+      }
     }
   };
   return (
     <div>
       <Navbar />
-      <div className="w-[1100px] h-max flex justify-around rounded-sm bg-zinc-900 py-8 mx-auto mt-8">
-        <div className="w-[450px] h-116 bg-zinc-800/50">
-          <div className="w-full h-max flex text-white text-lg bg-zinc-950">
-            <button
-              onClick={() => {
-                setIsSenderInventory(true);
-                !isSenderInventory && setCurrentPage(0);
-              }}
-              className={`w-full h-16 cursor-pointer ${
-                isSenderInventory &&
-                "border-b-5 border-indigo-500  text-indigo-500"
-              } `}
-            >
-              Your inventory
-            </button>
-            <button
-              onClick={() => {
-                setIsSenderInventory(false);
-                isSenderInventory && setCurrentPage(0);
-              }}
-              className={`w-full h-16 cursor-pointer ${
-                !isSenderInventory &&
-                "border-b-5 border-indigo-500  text-indigo-500"
-              }`}
-            >
-              Their inventory
-            </button>
+      {authErr || (
+        <div className="w-[1100px] h-max flex justify-around rounded-sm bg-zinc-900 py-8 mx-auto mt-8">
+          <div className="w-[450px] h-116 bg-zinc-800/50">
+            <div className="w-full h-max flex text-white text-lg bg-zinc-950">
+              <button
+                onClick={() => {
+                  setIsSenderInventory(true);
+                  !isSenderInventory && setCurrentPage(0);
+                }}
+                className={`w-full h-16 cursor-pointer ${
+                  isSenderInventory &&
+                  "border-b-5 border-indigo-500  text-indigo-500"
+                } `}
+              >
+                Your inventory
+              </button>
+              <button
+                onClick={() => {
+                  setIsSenderInventory(false);
+                  isSenderInventory && setCurrentPage(0);
+                }}
+                className={`w-full h-16 cursor-pointer ${
+                  !isSenderInventory &&
+                  "border-b-5 border-indigo-500  text-indigo-500"
+                }`}
+              >
+                Their inventory
+              </button>
+            </div>
+            <div className="w-11/12 h-78 gap-y-4 mx-auto py-2 grid grid-rows-3 grid-cols-4 mt-4  bg-zinc-900">
+              {isSenderInventory
+                ? senderSkins?.map((skin, index) => (
+                    <div
+                      onClick={() => handleAddSkin(index)}
+                      className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                      key={index}
+                    >
+                      <img className="w-20" src={skin?.image} alt="" />
+                    </div>
+                  ))
+                : receiverSkins?.map((skin, index) => (
+                    <div
+                      onClick={() => handleAddSkin(index)}
+                      className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                      key={index}
+                    >
+                      <img className="w-20" src={skin?.image} alt="" />
+                    </div>
+                  ))}
+            </div>
+            <div className="flex mt-4 justify-center gap-2 mx-auto">
+              <button
+                onClick={() => {
+                  currentPage >= 0 && setCurrentPage((prev) => prev - 1);
+                }}
+                className={`w-10 cursor-pointer hover:bg-zinc-800 rounded-sm text-white text-2xl ${btnBack} justify-center items-center h-10 bg-zinc-950`}
+              >
+                <IoIosArrowBack />
+              </button>
+              <div className="w-20 h-10 rounded-sm bg-zinc-950 text-white text-lg flex items-center justify-center">
+                <p>
+                  {currentPage + 1}/{lastPage}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  currentPage + 1 <= totalPages &&
+                    setCurrentPage((prev) => prev + 1);
+                }}
+                className={`w-10 cursor-pointer hover:bg-zinc-800 rounded-sm text-white text-2xl ${btnForward} justify-center items-center h-10 bg-zinc-950`}
+              >
+                <IoIosArrowForward />
+              </button>
+            </div>
           </div>
-          <div className="w-11/12 h-78 gap-y-4 mx-auto py-2 grid grid-rows-3 grid-cols-4 mt-4  bg-zinc-900">
-            {isSenderInventory
-              ? senderSkins?.map((skin, index) => (
+          <div className="w-[550px] h-max pb-4 bg-zinc-800/50">
+            <div className="w-full ">
+              <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
+                <img
+                  className="w-12 h-12"
+                  src={
+                    sender?.image
+                      ? `http://localhost:3000/uploads\\${sender.image}`
+                      : defaultProfilePicture
+                  }
+                />
+                <p className="pl-4">Your items</p>
+              </div>
+              <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll bg-zinc-900 mt-4">
+                {senderTradeSkins?.map((skin, index) => (
                   <div
-                    onClick={() => handleAddSkin(index)}
-                    className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
-                    key={index}
-                  >
-                    <img className="w-20" src={skin?.image} alt="" />
-                  </div>
-                ))
-              : receiverSkins?.map((skin, index) => (
-                  <div
-                    onClick={() => handleAddSkin(index)}
+                    onClick={() => handleRemoveSkin(index, "sender")}
                     className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
                     key={index}
                   >
                     <img className="w-20" src={skin?.image} alt="" />
                   </div>
                 ))}
-          </div>
-          <div className="flex mt-4 justify-center gap-2 mx-auto">
-            <button
-              onClick={() => {
-                currentPage >= 0 && setCurrentPage((prev) => prev - 1);
-              }}
-              className={`w-10 cursor-pointer hover:bg-zinc-800 rounded-sm text-white text-2xl ${btnBack} justify-center items-center h-10 bg-zinc-950`}
-            >
-              <IoIosArrowBack />
-            </button>
-            <div className="w-20 h-10 rounded-sm bg-zinc-950 text-white text-lg flex items-center justify-center">
-              <p>
-                {currentPage + 1}/{lastPage}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                currentPage + 1 <= totalPages &&
-                  setCurrentPage((prev) => prev + 1);
-              }}
-              className={`w-10 cursor-pointer hover:bg-zinc-800 rounded-sm text-white text-2xl ${btnForward} justify-center items-center h-10 bg-zinc-950`}
-            >
-              <IoIosArrowForward />
-            </button>
-          </div>
-        </div>
-        <div className="w-[550px] h-max pb-4 bg-zinc-800/50">
-          <div className="w-full ">
-            <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
-              <img
-                className="w-12 h-12"
-                src={
-                  sender?.image
-                    ? `http://localhost:3000/uploads\\${sender.image}`
-                    : defaultProfilePicture
-                }
-              />
-              <p className="pl-4">Your items</p>
-            </div>
-            <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll bg-zinc-900 mt-4">
-              {senderTradeSkins?.map((skin, index) => (
-                <div
-                  onClick={() => handleRemoveSkin(index, "sender")}
-                  className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
-                  key={index}
-                >
-                  <img className="w-20" src={skin?.image} alt="" />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="w-full mt-4">
-            <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
-              <img
-                className="w-12 h-12"
-                src={
-                  receiver?.image
-                    ? `http://localhost:3000/uploads\\${receiver.image}`
-                    : defaultProfilePicture
-                }
-              />
-              <p className="pl-4">{receiver?.username} items</p>
-            </div>
-            <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll h-48 bg-zinc-900 mt-4">
-              {receiverTradeSkins?.map((skin, index) => (
-                <div
-                  onClick={() => handleRemoveSkin(index, "receiver")}
-                  className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
-                  key={index}
-                >
-                  <img className="w-20" src={skin?.image} alt="" />
-                </div>
-              ))}
-            </div>
-            {tradeErr && (
-              <div
-                className={`py-1 w-68 pr-4  mx-auto border-2 border-red-400 mt-4 rounded-sm mb-4 flex items-center bg-zinc-950`}
-              >
-                <p className={`pl-4 text-red-400`}>! {tradeErr}</p>
               </div>
-            )}
+            </div>
+            <div className="w-full mt-4">
+              <div className="w-full h-max py-2 px-4 bg-zinc-950 flex items-center text-white text-lg">
+                <img
+                  className="w-12 h-12"
+                  src={
+                    receiver?.image
+                      ? `http://localhost:3000/uploads\\${receiver.image}`
+                      : defaultProfilePicture
+                  }
+                />
+                <p className="pl-4">{receiver?.username} items</p>
+              </div>
+              <div className="w-11/12 gap-y-4 mx-auto py-2 grid grid-cols-4 mt-4 h-52 overflow-y-scroll h-48 bg-zinc-900 mt-4">
+                {receiverTradeSkins?.map((skin, index) => (
+                  <div
+                    onClick={() => handleRemoveSkin(index, "receiver")}
+                    className="w-22 h-22 cursor-pointer flex items-center justify-center justify-self-center bg-zinc-800/25 hover:bg-zinc-800/75"
+                    key={index}
+                  >
+                    <img className="w-20" src={skin?.image} alt="" />
+                  </div>
+                ))}
+              </div>
+              {tradeErr && (
+                <div
+                  className={`py-1 w-68 pr-4  mx-auto border-2 border-red-400 mt-4 rounded-sm mb-4 flex items-center bg-zinc-950`}
+                >
+                  <p className={`pl-4 text-red-400`}>! {tradeErr}</p>
+                </div>
+              )}
 
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={handleCreateTrade}
-                className="w-40 h-10 bg-indigo-500 text-white text-lg rounded-lg cursor-pointer hover:bg-indigo-600"
-              >
-                Make offer
-              </button>
+              {isTradeCreated ? (
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`py-1 w-5/6 sm:w-68 pr-4 mx-auto border-2  border-green-400 mt-4 rounded-sm mb-4 flex  items-center bg-zinc-950`}
+                  >
+                    <p className={`pl-4 text-green-400`}>
+                      ! You successfully sent offer to {receiver?.username}. You
+                      will be redirected to trade hub in 5 seconds
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleCreateTrade}
+                    className="w-40 h-10 bg-indigo-500 text-white text-lg rounded-lg cursor-pointer hover:bg-indigo-600"
+                  >
+                    Make offer
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

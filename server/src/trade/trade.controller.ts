@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TradeService } from './trade.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -50,5 +59,17 @@ export class TradeController {
     @Body() tradeTransferSkinsDto: TradeTransferSkinsDto,
   ): Promise<void> {
     return this.tradeService.transferTradeSkins(user, tradeTransferSkinsDto);
+  }
+
+  @Patch('/deletetrade')
+  declineTrade(
+    @Body() tradeTransferSkinsDto: TradeTransferSkinsDto,
+  ): Promise<void> {
+    return this.tradeService.declineTrade(tradeTransferSkinsDto);
+  }
+
+  @Get('/getsentoffers')
+  getSentOffers(@GetUser() user: User): Promise<Trade[]> {
+    return this.tradeService.getSentOffers(user);
   }
 }

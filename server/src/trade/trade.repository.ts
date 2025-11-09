@@ -120,4 +120,27 @@ export class TradeRepository {
 
     await this.tradeModel.findByIdAndDelete(foundTrade._id);
   }
+
+  async declineTrade(
+    tradeTransferSkinsDto: TradeTransferSkinsDto,
+  ): Promise<void> {
+    const { _id } = tradeTransferSkinsDto;
+
+    if (!_id) throw new NotFoundException('Trade was not found');
+
+    await this.tradeModel.findByIdAndDelete(_id);
+  }
+
+  async getSentOffers(user: User): Promise<Trade[]> {
+    const foundTrades = await this.tradeModel
+      .find({ sender: user })
+      .lean()
+      .populate(['user', 'sender']);
+
+    if (!foundTrades) {
+      throw new NotFoundException('trades not found');
+    }
+
+    return foundTrades;
+  }
 }
